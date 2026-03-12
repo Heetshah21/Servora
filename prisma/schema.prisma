@@ -6,61 +6,50 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-enum Role {
-  OWNER
-  MANAGER
-  STAFF
-}
 
 model User {
-  id            String   @id @default(cuid())
-  name          String?
+  id            String    @id @default(cuid())
   email         String
+  name          String?
+  password      String
+  role          Role      @default(OWNER)
+  tenantId      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
   emailVerified DateTime?
   image         String?
-
-  password      String
-  role          Role     @default(OWNER)
-
-  tenantId      String
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
   accounts      Account[]
   sessions      Session[]
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  @@unique([email, tenantId]) // ⭐ VERY IMPORTANT
+  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  restaurantId  String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  @@unique([email, tenantId])
 }
 
 model Account {
-  id                 String @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?
-  access_token       String?
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?
-  session_state      String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
-
 
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -71,82 +60,63 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-//// MULTI-TENANCY CORE ////////////////////////////////////////////////////////
-
 model Tenant {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  timezone  String   @default("UTC")
-  locale    String   @default("en-US")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  restaurants Restaurant[]
-  menuCategories MenuCategory[]
-  menuItems MenuItem[]
-  orderItems OrderItem[]
-  customers   Customer[]
-  orders      Order[]
-  payments    Payment[]
-  users User[]
-
-}
-
-//// RESTAURANTS & MENU ////////////////////////////////////////////////////////
-
-model Restaurant {
-  id        String   @id @default(cuid())
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  name      String
-  slug      String
-  timezone  String?
-  address   String?
-  city      String?
-  country   String?
-  isActive  Boolean  @default(true)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
-
+  id             String         @id @default(cuid())
+  name           String
+  slug           String         @unique
+  timezone       String         @default("UTC")
+  locale         String         @default("en-US")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  customers      Customer[]
   menuCategories MenuCategory[]
   menuItems      MenuItem[]
   orders         Order[]
-
-  @@index([tenantId])
-  @@unique([tenantId, slug])
+  orderItems     OrderItem[]
+  payments       Payment[]
+  restaurants    Restaurant[]
+  users          User[]
 }
 
-enum MenuItemType {
-  FOOD
-  DRINK
-  ADDON
+model Restaurant {
+  id             String         @id @default(cuid())
+  tenantId       String
+  name           String
+  slug           String
+  timezone       String?
+  address        String?
+  city           String?
+  country        String?
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+  menuCategories MenuCategory[]
+  menuItems      MenuItem[]
+  orders         Order[]
+  users          User[] 
+  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
 }
 
 model MenuCategory {
-  id           String      @id @default(cuid())
+  id           String     @id @default(cuid())
   tenantId     String
   restaurantId String
-
-  tenant       Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-
   name         String
   description  String?
-  position     Int         @default(0)
-  isActive     Boolean     @default(true)
-
+  position     Int        @default(0)
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  tenant       Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   menuItems    MenuItem[]
 
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-
-  @@index([tenantId, restaurantId])
   @@unique([tenantId, restaurantId, name])
+  @@index([tenantId, restaurantId])
 }
 
 model MenuItem {
@@ -154,57 +124,136 @@ model MenuItem {
   tenantId     String
   restaurantId String
   categoryId   String?
-
-  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  category     MenuCategory? @relation(fields: [categoryId], references: [id])
-
   name         String
   description  String?
   sku          String?
-  price        Decimal       
+  price        Decimal
   currency     String        @default("USD")
   type         MenuItemType  @default(FOOD)
   isAvailable  Boolean       @default(true)
+  isJainAvailable Boolean @default(false)
   position     Int           @default(0)
-
   imageUrl     String?
-
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   deletedAt    DateTime?
-
+  category     MenuCategory? @relation(fields: [categoryId], references: [id])
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   orderItems   OrderItem[]
 
+  @@unique([tenantId, restaurantId, sku])
   @@index([tenantId, restaurantId])
   @@index([tenantId, isAvailable])
-  @@unique([tenantId, restaurantId, sku])
 }
-
-//// CUSTOMERS /////////////////////////////////////////////////////////////////
 
 model Customer {
   id         String   @id @default(cuid())
   tenantId   String
-  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
   email      String?
   phone      String?
   name       String?
-
   externalId String?
   notes      String?
-
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   orders     Order[]
 
   @@index([tenantId, email])
   @@index([tenantId, phone])
 }
 
-//// ORDERS & ORDER ITEMS //////////////////////////////////////////////////////
+model Order {
+  id                 String      @id @default(cuid())
+  tenantId           String
+  restaurantId       String
+  customerId         String?
+  status             OrderStatus @default(PENDING)
+  source             OrderSource @default(ONLINE)
+  subtotal           Decimal
+  tax                Decimal
+  discount           Decimal     @default(0)
+  total              Decimal
+  currency           String      @default("USD")
+  placedAt           DateTime    @default(now())
+  confirmedAt        DateTime?
+  fulfilledAt        DateTime?
+  cancelledAt        DateTime?
+  cancellationReason String?
+  notes              String?
+  tableNumber        String?
+  orderCode          String?
+  externalId         String?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  customer           Customer?   @relation(fields: [customerId], references: [id])
+  restaurant         Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  tenant             Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items              OrderItem[]
+  payments           Payment[]
+
+  @@index([tenantId, restaurantId, placedAt])
+  @@index([tenantId, status, placedAt])
+  @@index([tenantId, customerId, placedAt])
+  @@index([tenantId, orderCode])
+}
+
+model OrderItem {
+  id         String    @id @default(cuid())
+  tenantId   String
+  orderId    String
+  menuItemId String?
+  name       String
+  sku        String?
+  unitPrice  Decimal
+  quantity   Int
+  totalPrice Decimal
+  notes      String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  menuItem   MenuItem? @relation(fields: [menuItemId], references: [id])
+  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tenant     Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, orderId])
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  tenantId          String
+  orderId           String
+  status            PaymentStatus @default(PENDING)
+  method            PaymentMethod
+  amount            Decimal
+  currency          String        @default("USD")
+  provider          String?
+  providerPaymentId String?       @unique
+  providerChargeId  String?
+  providerRefundId  String?
+  metadata          Json?
+  paidAt            DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  order             Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tenant            Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, orderId])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+}
+
+enum Role {
+  OWNER
+  MANAGER
+  STAFF
+}
+
+enum MenuItemType {
+  FOOD
+  DRINK
+  ADDON
+}
 
 enum OrderStatus {
   PENDING
@@ -222,74 +271,6 @@ enum OrderSource {
   KIOSK
 }
 
-model Order {
-  id           String       @id @default(cuid())
-  tenantId     String
-  restaurantId String
-  customerId   String?
-
-  tenant       Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  restaurant   Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  customer     Customer?    @relation(fields: [customerId], references: [id])
-
-  status       OrderStatus  @default(PENDING)
-  source       OrderSource  @default(ONLINE)
-
-  subtotal     Decimal      
-  tax          Decimal      
-  discount     Decimal      @default(0)
-  total        Decimal      
-  currency     String       @default("USD")
-
-  placedAt     DateTime     @default(now())
-  confirmedAt  DateTime?
-  fulfilledAt  DateTime?
-  cancelledAt  DateTime?
-  cancellationReason String?
-
-  notes        String?
-  tableNumber  String?
-  orderCode    String?
-  externalId   String?
-
-  items        OrderItem[]
-  payments     Payment[]
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@index([tenantId, restaurantId, placedAt])
-  @@index([tenantId, status, placedAt])
-  @@index([tenantId, customerId, placedAt])
-  @@index([tenantId, orderCode])
-}
-
-model OrderItem {
-  id           String   @id @default(cuid())
-  tenantId     String
-  orderId      String
-  menuItemId   String?
-
-  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  menuItem     MenuItem? @relation(fields: [menuItemId], references: [id])
-
-  name         String
-  sku          String?
-  unitPrice    Decimal  
-  quantity     Int
-  totalPrice   Decimal  
-
-  notes        String?
-
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@index([tenantId, orderId])
-}
-
-//// PAYMENTS /////////////////////////////////////////////////////////////////
-
 enum PaymentStatus {
   PENDING
   AUTHORIZED
@@ -305,34 +286,3 @@ enum PaymentMethod {
   WALLET
   OTHER
 }
-
-model Payment {
-  id           String        @id @default(cuid())
-  tenantId     String
-  orderId      String
-
-  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  order        Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  status       PaymentStatus @default(PENDING)
-  method       PaymentMethod
-
-  amount       Decimal       
-  currency     String        @default("USD")
-
-  provider     String?
-  providerPaymentId String?  @unique
-  providerChargeId  String?
-  providerRefundId  String?
-
-  metadata     Json?
-
-  paidAt       DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@index([tenantId, orderId])
-  @@index([tenantId, status])
-  @@index([tenantId, createdAt])
-}
-

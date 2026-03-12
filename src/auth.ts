@@ -8,6 +8,7 @@ declare module "next-auth" {
   interface User {
     role: string;
     tenantId: string;
+    restaurantId: string;
   }
 
   interface Session {
@@ -15,6 +16,7 @@ declare module "next-auth" {
       id: string;
       role: string;
       tenantId: string;
+      restaurantId: string;
     };
   }
 }
@@ -56,6 +58,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             password: true,
             role: true,
             tenantId: true,
+            restaurantId: true,
           },
         });
 
@@ -73,6 +76,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: user.id,
           role: user.role,
           tenantId: user.tenantId,
+          restaurantId: user.restaurantId,
         };
       },
     }),
@@ -88,6 +92,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.id = user.id;
         token.role = user.role;
         token.tenantId = user.tenantId;
+        token.restaurantId = user.restaurantId;
       }
       return token;
     },
@@ -99,6 +104,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         id: token.id as string,
         role: token.role as string,
         tenantId: token.tenantId as string,
+        restaurantId: token.restaurantId as string,
       };
     
       return session;
