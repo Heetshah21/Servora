@@ -88,12 +88,46 @@ function Column({ title, orders, tenant }: any) {
           )}
 
           <div style={{ marginTop: "8px", display: "grid", gap: "4px" }}>
-            {order.items.map((item: any) => (
-              <div key={item.id} style={{ fontSize: "14px", color: "#374151" }}>
-                {item.quantity}x {item.name}
-              </div>
-            ))}
+          {order.items.map((item: any) => (
+            <div key={item.id} style={{ fontSize: "14px", color: "#374151" }}>
+              {item.quantity}x {item.name}
+
+              {item.isJain && (
+                <span
+                  style={{
+                    background: "#16a34a",
+                    color: "white",
+                    padding: "2px 6px",
+                    borderRadius: "6px",
+                    fontSize: "11px",
+                    marginLeft: "6px",
+                  }}
+                >
+                  Jain
+                </span>
+              )}
+
+              {item.notes && (
+                <div style={{ fontSize: "12px", color: "#6b7280" }}>
+                  Note: {item.notes}
+                </div>
+              )}
+            </div>
+          ))}
           </div>
+          {order.notes && (
+            <div
+              style={{
+                marginTop: "8px",
+                background: "#fef9c3",
+                padding: "6px",
+                borderRadius: "6px",
+                fontSize: "13px",
+              }}
+            >
+              <strong>Order Note:</strong> {order.notes}
+            </div>
+          )}
           <div style={{ marginTop: "10px", display: "flex", gap: "6px", flexWrap: "wrap" }}>
 
           {order.status === "PENDING" && (

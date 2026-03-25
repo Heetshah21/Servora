@@ -76,11 +76,39 @@ export default async function OrdersPage({ params }: Props) {
           <p style={{ margin: "6px 0 0", color: "#4b5563", fontSize: "14px" }}>Status: {order.status}</p>
 
           <div style={{ marginTop: "10px", display: "grid", gap: "4px" }}>
-            {order.items.map((item) => (
-              <div key={item.id} style={{ color: "#374151", fontSize: "14px" }}>
-                {item.quantity}x {item.name}
-              </div>
-            ))}
+          {order.items.map((item) => (
+            <div key={item.id} style={{ color: "#374151", fontSize: "14px" }}>
+              {item.quantity}x {item.name}
+              {item.isJain && (
+                  <span
+                  style={{
+                    background: "#16a34a",
+                    color: "white",
+                    padding: "2px 6px",
+                    borderRadius: "6px",
+                    fontSize: "13px",
+                    marginLeft: "6px",
+                  }}
+                >
+                  Jain
+                </span>
+              )}
+
+              {item.notes && (
+                <div style={{ fontSize: "12px", color: "#6b7280" }}>
+                  Note: {item.notes}
+                </div>
+              )}
+            </div>
+          ))}
+        {order.notes && (
+          <div style={{ marginTop: "8px" }}>
+            <strong style={{ fontSize: "13px" }}>Order Note:</strong>
+            <div style={{ fontSize: "13px", color: "#374151" }}>
+              {order.notes}
+            </div>
+          </div>
+        )}
           </div>
           <form
           action={async (formData: FormData) => {

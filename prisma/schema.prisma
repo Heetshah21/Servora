@@ -215,6 +215,7 @@ model OrderItem {
   quantity   Int
   totalPrice Decimal
   notes      String?
+  isJain     Boolean   @default(false)
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   menuItem   MenuItem? @relation(fields: [menuItemId], references: [id])

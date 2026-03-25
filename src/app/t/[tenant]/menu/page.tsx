@@ -89,6 +89,7 @@
                   name: item.name,
                   price: Number(item.price),
                   imageUrl: item.imageUrl,
+                  isJainAvailable: item.isJainAvailable,
                 }}
               />
               </div>

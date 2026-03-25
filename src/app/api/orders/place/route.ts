@@ -5,7 +5,7 @@ import { Prisma } from "@prisma/client";
 export async function POST(req: Request) {
   const body = await req.json();
 
-  const { tenantSlug, items } = body;
+  const { tenantSlug, items, orderNotes } = body;
 
   const tenant = await db.tenant.findFirst({
     where: { slug: tenantSlug },
@@ -13,16 +13,12 @@ export async function POST(req: Request) {
       restaurants: true,
     },
   });
-  
+
   if (!tenant || tenant.restaurants.length === 0) {
     return NextResponse.json({ error: "Restaurant not found" });
   }
-  
-  const restaurant = tenant.restaurants[0];
 
-  if (!restaurant) {
-    return NextResponse.json({ error: "Restaurant not found" });
-  }
+  const restaurant = tenant.restaurants[0];
 
   let subtotal = 0;
 
@@ -44,6 +40,7 @@ export async function POST(req: Request) {
       discount: new Prisma.Decimal(discount),
       total: new Prisma.Decimal(total),
       currency: "INR",
+      notes: orderNotes || null,
 
       items: {
         create: items.map((item: any) => ({
@@ -55,6 +52,8 @@ export async function POST(req: Request) {
           totalPrice: new Prisma.Decimal(
             item.price * item.quantity
           ),
+          isJain: item.isJain || false,
+          notes: item.notes || null,
         })),
       },
     },
