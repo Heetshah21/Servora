@@ -13,5 +13,73 @@ body {
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Segoe UI", sans-serif;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
+/* ── Mobile-responsive overrides ── */
+
+/* Menu item cards: stack vertically on mobile */
+@media (max-width: 600px) {
+  .menu-item-card {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .menu-item-card .menu-item-image {
+    width: 100% !important;
+    height: 180px !important;
+    flex: none !important;
+  }
+
+  .menu-item-card .menu-item-body {
+    flex: none !important;
+  }
+
+  .menu-item-card .menu-item-add-wrap {
+    padding-left: 0 !important;
+    width: 100% !important;
+  }
+
+  .menu-item-card .menu-item-add-wrap button {
+    width: 100% !important;
+    height: 44px !important;
+  }
+
+  /* Order tracker: stack vertically */
+  .order-tracker {
+    grid-template-columns: 1fr !important;
+    gap: 0 !important;
+  }
+
+  .order-tracker-step {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 8px 0 !important;
+  }
+
+  .order-tracker-step .tracker-dot-line {
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  .order-tracker-step .tracker-line {
+    width: 2px !important;
+    height: 20px !important;
+    margin: 4px 0 !important;
+  }
+
+  .order-tracker-step .tracker-label {
+    margin-top: 0 !important;
+    white-space: normal !important;
+    text-align: left !important;
+  }
+
+  /* Cart quantity buttons: bigger tap targets */
+  .qty-btn {
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 18px !important;
+  }
+}

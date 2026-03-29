@@ -6,6 +6,7 @@ import {
   updateQuantity,
   removeFromCart,
 } from "@/lib/cart";
+import { useIsMobile } from "@/lib/useIsMobile";
 
 export default function CartClient({ restaurant }: { restaurant: string }) {
   const [cart, setCart] = useState<any[]>([]);
@@ -14,6 +15,7 @@ export default function CartClient({ restaurant }: { restaurant: string }) {
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const isMobile = useIsMobile();
 
   const loadCart = () => {
     setCart(getCart());
@@ -91,10 +93,23 @@ export default function CartClient({ restaurant }: { restaurant: string }) {
     }
   };
 
+  const qtyBtnStyle: React.CSSProperties = {
+    width: isMobile ? "40px" : "34px",
+    height: isMobile ? "40px" : "34px",
+    borderRadius: "12px",
+    border: "1px solid #e5e7eb",
+    background: "#f9fafb",
+    cursor: "pointer",
+    fontSize: isMobile ? "18px" : "16px",
+    color: "#111827",
+    fontWeight: 700,
+    boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
+  };
+
   return (
     <div
       style={{
-        padding: "20px",
+        padding: isMobile ? "16px 12px" : "20px",
         maxWidth: "720px",
         margin: "0 auto",
         paddingBottom: "120px",
@@ -102,6 +117,7 @@ export default function CartClient({ restaurant }: { restaurant: string }) {
         borderRadius: "12px",
         boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
         boxSizing: "border-box",
+        width: "100%",
       }}
     >
       <a
@@ -117,7 +133,7 @@ export default function CartClient({ restaurant }: { restaurant: string }) {
         ← Back to Menu
       </a>
 
-      <h1 style={{ marginBottom: "20px", color: "#111827" }}>Your Cart</h1>
+      <h1 style={{ marginBottom: "20px", color: "#111827", fontSize: isMobile ? "22px" : "28px" }}>Your Cart</h1>
 
       {cart.length === 0 && <p>Cart is empty</p>}
 
@@ -126,9 +142,10 @@ export default function CartClient({ restaurant }: { restaurant: string }) {
           key={item.id + (item.isJain ? "-jain" : "")}
           style={{
             display: "flex",
+            flexDirection: isMobile ? "column" : "row",
             gap: "10px",
             border: "1px solid #e5e7eb",
-            padding: "14px",
+            padding: isMobile ? "12px" : "14px",
             borderRadius: "12px",
             marginBottom: "12px",
             background: "white",
@@ -140,8 +157,8 @@ export default function CartClient({ restaurant }: { restaurant: string }) {
             <img
               src={item.imageUrl}
               style={{
-                width: "60px",
-                height: "60px",
+                width: isMobile ? "100%" : "60px",
+                height: isMobile ? "160px" : "60px",
                 objectFit: "cover",
                 borderRadius: "12px",
               }}
@@ -183,18 +200,8 @@ export default function CartClient({ restaurant }: { restaurant: string }) {
                   changeQty(item.id, item.quantity - 1, item.isJain)
                 }
                 type="button"
-                style={{
-                  width: "34px",
-                  height: "34px",
-                  borderRadius: "12px",
-                  border: "1px solid #e5e7eb",
-                  background: "#f9fafb",
-                  cursor: "pointer",
-                  fontSize: "16px",
-                  color: "#111827",
-                  fontWeight: 700,
-                  boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
-                }}
+                className="qty-btn"
+                style={qtyBtnStyle}
               >
                 -
               </button>
@@ -208,18 +215,8 @@ export default function CartClient({ restaurant }: { restaurant: string }) {
                   changeQty(item.id, item.quantity + 1, item.isJain)
                 }
                 type="button"
-                style={{
-                  width: "34px",
-                  height: "34px",
-                  borderRadius: "12px",
-                  border: "1px solid #e5e7eb",
-                  background: "#f9fafb",
-                  cursor: "pointer",
-                  fontSize: "16px",
-                  color: "#111827",
-                  fontWeight: 700,
-                  boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
-                }}
+                className="qty-btn"
+                style={qtyBtnStyle}
               >
                 +
               </button>
@@ -233,7 +230,7 @@ export default function CartClient({ restaurant }: { restaurant: string }) {
           style={{
             border: "1px solid #e5e7eb",
             borderRadius: "12px",
-            padding: "16px",
+            padding: isMobile ? "14px 12px" : "16px",
             background: "#fff",
             boxSizing: "border-box",
             marginTop: "8px",
@@ -285,6 +282,7 @@ export default function CartClient({ restaurant }: { restaurant: string }) {
                   border: "1px solid #e5e7eb",
                   marginTop: "6px",
                   fontSize: "14px",
+                  boxSizing: "border-box",
                   boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
                 }}
               >
@@ -349,13 +347,13 @@ export default function CartClient({ restaurant }: { restaurant: string }) {
             onClick={placeOrder}
             style={{
               width: "100%",
-              padding: "14px",
+              padding: isMobile ? "16px" : "14px",
               background: "#111827",
               color: "white",
               border: "none",
               borderRadius: "12px",
               marginTop: "18px",
-              fontSize: "16px",
+              fontSize: isMobile ? "17px" : "16px",
               fontWeight: 700,
               cursor: "pointer",
               boxShadow: "0 4px 14px rgba(0,0,0,0.06)",

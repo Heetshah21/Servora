@@ -43,7 +43,7 @@ export default async function CustomerMenuPage({
 
       <div
         style={{
-          padding: "18px 15px",
+          padding: "18px 12px",
           maxWidth: "960px",
           margin: "0 auto",
           paddingBottom: "120px",
@@ -51,15 +51,16 @@ export default async function CustomerMenuPage({
           background: "#f5f6f8",
           borderRadius: "12px",
           boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
+          width: "100%",
         }}
       >
-        <h1 style={{ margin: "0 0 16px", fontSize: "24px", color: "#111827" }}>
+        <h1 style={{ margin: "0 0 16px", fontSize: "clamp(20px, 5vw, 24px)", color: "#111827" }}>
           {restaurant?.name}
         </h1>
 
         {table && <p style={{ color: "green" }}>Table: {table}</p>}
 
-        {categories.map((category) => (
+        {(categories as typeof categories).map((category: typeof categories[number]) => (
           <div key={category.id} style={{ marginBottom: "26px" }}>
             <div
               style={{
@@ -68,6 +69,7 @@ export default async function CustomerMenuPage({
                 zIndex: 10,
                 background: "rgba(245, 246, 248, 0.85)",
                 backdropFilter: "blur(10px)",
+                WebkitBackdropFilter: "blur(10px)",
                 padding: "10px 0",
                 borderBottom: "1px solid #e5e7eb",
               }}
@@ -78,23 +80,26 @@ export default async function CustomerMenuPage({
             </div>
 
             <div style={{ display: "grid", gap: "14px", paddingTop: "12px" }}>
-              {category.menuItems.map((item) => (
+              {category.menuItems.map((item: typeof categories[number]["menuItems"][number]) => (
                 <div
                   key={item.id}
+                  className="menu-item-card"
                   style={{
                     display: "flex",
                     gap: "14px",
-                    padding: "16px",
+                    padding: "14px",
                     border: "1px solid #e5e7eb",
                     borderRadius: "12px",
                     background: "#ffffff",
                     boxSizing: "border-box",
                     boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
+                    flexWrap: "wrap",
                   }}
                 >
                   {item.imageUrl && (
                     <img
                       src={item.imageUrl}
+                      className="menu-item-image"
                       style={{
                         width: "80px",
                         height: "80px",
@@ -106,8 +111,8 @@ export default async function CustomerMenuPage({
                     />
                   )}
 
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
+                  <div className="menu-item-body" style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <strong style={{ display: "block", color: "#111827", fontSize: "15px" }}>
                           {item.name}
@@ -144,7 +149,7 @@ export default async function CustomerMenuPage({
                     </div>
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", paddingLeft: "2px" }}>
+                  <div className="menu-item-add-wrap" style={{ display: "flex", alignItems: "center", paddingLeft: "2px" }}>
                     <AddToCartButton
                       item={{
                         id: item.id,

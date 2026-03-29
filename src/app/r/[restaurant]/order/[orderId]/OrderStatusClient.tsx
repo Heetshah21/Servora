@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useIsMobile } from "@/lib/useIsMobile";
 
 export default function OrderStatusClient({ orderId }: any) {
   const [order, setOrder] = useState<any>(null);
+  const isMobile = useIsMobile();
 
   const loadOrder = async () => {
     const res = await fetch(`/api/orders/${orderId}`);
@@ -19,7 +21,7 @@ export default function OrderStatusClient({ orderId }: any) {
     return () => clearInterval(interval);
   }, []);
 
-  if (!order) return <p>Loading...</p>;
+  if (!order) return <p style={{ padding: "20px", textAlign: "center" }}>Loading...</p>;
 
   const steps = ["PENDING", "CONFIRMED", "IN_PROGRESS", "READY", "COMPLETED"] as const;
   const currentStepIndex = Math.max(0, steps.indexOf(order.status));
@@ -35,24 +37,33 @@ export default function OrderStatusClient({ orderId }: any) {
             ? { bg: "#eef2ff", border: "#c7d2fe", fg: "#3730a3" }
             : { bg: "#f3f4f6", border: "#e5e7eb", fg: "#374151" };
 
+  const stepLabels: Record<string, string> = {
+    PENDING: "Pending",
+    CONFIRMED: "Confirmed",
+    IN_PROGRESS: "Preparing",
+    READY: "Ready",
+    COMPLETED: "Done",
+  };
+
   return (
     <div
       style={{
         minHeight: "100vh",
         background: "#f5f6f8",
-        padding: "28px 16px",
+        padding: isMobile ? "16px 10px" : "28px 16px",
         boxSizing: "border-box",
       }}
     >
-      <div style={{ maxWidth: "760px", margin: "0 auto" }}>
+      <div style={{ maxWidth: "760px", margin: "0 auto", width: "100%" }}>
         <div
           style={{
             borderRadius: "16px",
             background: "rgba(255,255,255,0.9)",
             border: "1px solid rgba(229,231,235,0.9)",
             backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)",
             boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
-            padding: "18px",
+            padding: isMobile ? "14px" : "18px",
           }}
         >
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
@@ -60,7 +71,7 @@ export default function OrderStatusClient({ orderId }: any) {
               <div style={{ fontSize: "12px", color: "#6b7280", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase" }}>
                 Order
               </div>
-              <div style={{ fontSize: "26px", fontWeight: 800, color: "#111827", marginTop: "4px" }}>
+              <div style={{ fontSize: isMobile ? "22px" : "26px", fontWeight: 800, color: "#111827", marginTop: "4px" }}>
                 #{order.orderCode || String(order.id || "").slice(0, 6)}
               </div>
             </div>
@@ -111,66 +122,124 @@ export default function OrderStatusClient({ orderId }: any) {
             ) : null}
           </div>
 
+          {/* ORDER TRACKER */}
           <div style={{ marginTop: "16px" }}>
             <div style={{ fontSize: "13px", fontWeight: 700, color: "#111827", marginBottom: "10px" }}>
               Tracking
             </div>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
-                gap: "10px",
-              }}
-            >
-              {steps.map((s, idx) => {
-                const isDone = idx < currentStepIndex;
-                const isCurrent = idx === currentStepIndex;
-                const dotBg = isCurrent || isDone ? "#111827" : "#e5e7eb";
-                const lineBg = isDone ? "#111827" : "#e5e7eb";
 
-                return (
-                  <div key={s} style={{ minWidth: 0 }}>
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                      <div
-                        style={{
-                          width: "10px",
-                          height: "10px",
-                          borderRadius: "999px",
-                          background: dotBg,
-                          boxShadow: isCurrent ? "0 0 0 4px rgba(17,24,39,0.12)" : "none",
-                          flex: "0 0 auto",
-                        }}
-                      />
-                      {idx < steps.length - 1 && (
+            {isMobile ? (
+              /* ── Vertical tracker for mobile ── */
+              <div style={{ display: "flex", flexDirection: "column", gap: "0px", paddingLeft: "4px" }}>
+                {steps.map((s, idx) => {
+                  const isDone = idx < currentStepIndex;
+                  const isCurrent = idx === currentStepIndex;
+                  const dotBg = isCurrent || isDone ? "#111827" : "#e5e7eb";
+                  const lineBg = isDone ? "#111827" : "#e5e7eb";
+
+                  return (
+                    <div key={s} style={{ display: "flex", alignItems: "stretch", gap: "12px" }}>
+                      {/* Dot + vertical line */}
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "20px" }}>
                         <div
                           style={{
-                            height: "2px",
-                            background: lineBg,
-                            flex: 1,
-                            marginLeft: "8px",
-                            marginRight: "8px",
+                            width: "12px",
+                            height: "12px",
+                            borderRadius: "999px",
+                            background: dotBg,
+                            boxShadow: isCurrent ? "0 0 0 4px rgba(17,24,39,0.12)" : "none",
+                            flex: "0 0 auto",
+                            marginTop: "2px",
                           }}
                         />
-                      )}
+                        {idx < steps.length - 1 && (
+                          <div
+                            style={{
+                              width: "2px",
+                              flex: 1,
+                              minHeight: "20px",
+                              background: lineBg,
+                              margin: "4px 0",
+                            }}
+                          />
+                        )}
+                      </div>
+                      {/* Label */}
+                      <div
+                        style={{
+                          fontSize: "13px",
+                          fontWeight: isCurrent ? 800 : 600,
+                          color: isCurrent ? "#111827" : "#6b7280",
+                          paddingBottom: idx < steps.length - 1 ? "14px" : "0px",
+                          paddingTop: "0px",
+                          lineHeight: "1.2",
+                        }}
+                      >
+                        {stepLabels[s] || s.replaceAll("_", " ")}
+                      </div>
                     </div>
-                    <div
-                      style={{
-                        marginTop: "8px",
-                        fontSize: "11px",
-                        fontWeight: isCurrent ? 800 : 700,
-                        color: isCurrent ? "#111827" : "#6b7280",
-                        textAlign: "left",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                      }}
-                    >
-                      {s.replaceAll("_", " ")}
+                  );
+                })}
+              </div>
+            ) : (
+              /* ── Horizontal tracker for desktop ── */
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+                  gap: "10px",
+                }}
+              >
+                {steps.map((s, idx) => {
+                  const isDone = idx < currentStepIndex;
+                  const isCurrent = idx === currentStepIndex;
+                  const dotBg = isCurrent || isDone ? "#111827" : "#e5e7eb";
+                  const lineBg = isDone ? "#111827" : "#e5e7eb";
+
+                  return (
+                    <div key={s} style={{ minWidth: 0 }}>
+                      <div style={{ display: "flex", alignItems: "center" }}>
+                        <div
+                          style={{
+                            width: "10px",
+                            height: "10px",
+                            borderRadius: "999px",
+                            background: dotBg,
+                            boxShadow: isCurrent ? "0 0 0 4px rgba(17,24,39,0.12)" : "none",
+                            flex: "0 0 auto",
+                          }}
+                        />
+                        {idx < steps.length - 1 && (
+                          <div
+                            style={{
+                              height: "2px",
+                              background: lineBg,
+                              flex: 1,
+                              marginLeft: "8px",
+                              marginRight: "8px",
+                            }}
+                          />
+                        )}
+                      </div>
+                      <div
+                        style={{
+                          marginTop: "8px",
+                          fontSize: "11px",
+                          fontWeight: isCurrent ? 800 : 700,
+                          color: isCurrent ? "#111827" : "#6b7280",
+                          textAlign: "left",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
+                        {stepLabels[s] || s.replaceAll("_", " ")}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 
@@ -181,7 +250,7 @@ export default function OrderStatusClient({ orderId }: any) {
               background: "#fff",
               border: "1px solid #e5e7eb",
               boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
-              padding: "16px",
+              padding: isMobile ? "14px" : "16px",
             }}
           >
             <div style={{ fontSize: "13px", fontWeight: 800, color: "#111827", marginBottom: "10px" }}>
@@ -197,15 +266,16 @@ export default function OrderStatusClient({ orderId }: any) {
                     alignItems: "flex-start",
                     justifyContent: "space-between",
                     gap: "12px",
-                    padding: "12px",
+                    padding: isMobile ? "10px" : "12px",
                     borderRadius: "12px",
                     border: "1px solid #eef2f7",
                     background: "#ffffff",
+                    flexWrap: "wrap",
                   }}
                 >
-                  <div style={{ minWidth: 0 }}>
+                  <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                      <div style={{ fontWeight: 700, color: "#111827" }}>{item.name}</div>
+                      <div style={{ fontWeight: 700, color: "#111827", fontSize: isMobile ? "14px" : "inherit" }}>{item.name}</div>
                       {item.isJain && (
                         <span
                           style={{
@@ -261,7 +331,7 @@ export default function OrderStatusClient({ orderId }: any) {
               background: "#fff",
               border: "1px solid #e5e7eb",
               boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
-              padding: "16px",
+              padding: isMobile ? "14px" : "16px",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
@@ -269,7 +339,7 @@ export default function OrderStatusClient({ orderId }: any) {
             }}
           >
             <div style={{ color: "#6b7280", fontWeight: 700 }}>Total</div>
-            <div style={{ fontSize: "20px", fontWeight: 900, color: "#111827" }}>₹{order.total}</div>
+            <div style={{ fontSize: isMobile ? "18px" : "20px", fontWeight: 900, color: "#111827" }}>₹{order.total}</div>
           </div>
         </div>
       </div>
