@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import { requireAuth } from "@/lib/require-auth";
 import { db } from "@/lib/db";
 import { createCategory, createMenuItem } from "./actions";
