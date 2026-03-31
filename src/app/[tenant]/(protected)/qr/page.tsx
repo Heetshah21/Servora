@@ -1,5 +1,3 @@
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
 import { db } from "@/lib/db";
 import QRClient from "./QRClient";
 
@@ -18,12 +16,13 @@ export default async function QRPage({ params }: Props) {
     },
   });
 
-  if (!restaurant) {
-    return <div>Restaurant not found</div>;
-  }
-  if (!restaurant.shortCode) {
+  if (!restaurant || !restaurant.shortCode) {
     return <div>Restaurant short code not set</div>;
   }
 
-  return <QRClient shortCode={restaurant.shortCode} />;
+  return (
+    <div>
+      <QRClient shortCode={restaurant.shortCode} />
+    </div>
+  );
 }

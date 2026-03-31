@@ -34,13 +34,14 @@ export default function QRClient({ shortCode }: { shortCode: string }) {
         placeholder="Number of Tables"
         value={count}
         onChange={(e) => setCount(e.target.value)}
+        style={{ padding: "10px", marginRight: "10px" }}
       />
 
       <button onClick={generateQR}>Generate QR Codes</button>
 
       <div style={{ marginTop: "30px" }}>
         {qrs.map((q) => (
-          <div key={q.table}>
+          <div key={q.table} style={{ marginBottom: "20px" }}>
             <h3>Table {q.table}</h3>
             <img src={q.qr} style={{ width: "150px" }} />
             <p>{q.url}</p>
