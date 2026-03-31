@@ -12,7 +12,7 @@ export default function QRClient({ tenant }: { tenant: string }) {
     const arr = [];
 
     for (let i = 1; i <= total; i++) {
-      const url = `http://localhost:3000/r/${tenant}/menu?table=${i}`;
+      const url = `http://servora-sable.vercel.app/r/${tenant}/menu?table=${i}`;
       const qr = await QRCode.toDataURL(url);
 
       arr.push({
