@@ -20,98 +20,92 @@ export default async function DashboardPage({ params }: Props) {
       id: session.user.restaurantId,
     },
   });
-  const ordersToday = await db.order.count({
-    where: {
-      tenantId: session.user.tenantId,
-      restaurantId: session.user.restaurantId,
-      placedAt: {
-        gte: startOfDay,
+  
+  const [
+    ordersToday,
+    activeOrders,
+    menuItems,
+    revenueToday,
+    completedOrdersToday,
+    dineInOrders,
+    takeawayOrders,
+    deliveryOrders
+  ] = await Promise.all([
+    db.order.count({
+      where: {
+        tenantId: session.user.tenantId,
+        restaurantId: session.user.restaurantId,
+        placedAt: { gte: startOfDay },
       },
-    },
-  });
-
-  const activeOrders = await db.order.count({
-    where: {
-      tenantId: session.user.tenantId,
-      restaurantId: session.user.restaurantId,
-      status: {
-        in: ["PENDING", "CONFIRMED", "IN_PROGRESS", "READY"],
+    }),
+  
+    db.order.count({
+      where: {
+        tenantId: session.user.tenantId,
+        restaurantId: session.user.restaurantId,
+        status: {
+          in: ["PENDING", "CONFIRMED", "IN_PROGRESS", "READY"],
+        },
       },
-    },
-  });
-
-  const menuItems = await db.menuItem.count({
-    where: {
-      tenantId: session.user.tenantId,
-      restaurantId: session.user.restaurantId,
-    },
-  });
-  const revenueToday = await db.payment.aggregate({
-    where: {
-      tenantId: session.user.tenantId,
-      order: {
+    }),
+  
+    db.menuItem.count({
+      where: {
+        tenantId: session.user.tenantId,
         restaurantId: session.user.restaurantId,
       },
-      status: "CAPTURED",
-      paidAt: {
-        gte: startOfDay,
+    }),
+  
+    db.payment.aggregate({
+      where: {
+        tenantId: session.user.tenantId,
+        order: {
+          restaurantId: session.user.restaurantId,
+        },
+        status: "CAPTURED",
+        paidAt: { gte: startOfDay },
       },
-    },
-    _sum: {
-      amount: true,
-    },
-  });
+      _sum: { amount: true },
+    }),
+  
+    db.order.count({
+      where: {
+        tenantId: session.user.tenantId,
+        restaurantId: session.user.restaurantId,
+        status: "COMPLETED",
+        placedAt: { gte: startOfDay },
+      },
+    }),
+  
+    db.order.count({
+      where: {
+        tenantId: session.user.tenantId,
+        restaurantId: session.user.restaurantId,
+        source: "IN_STORE",
+        placedAt: { gte: startOfDay },
+      },
+    }),
+  
+    db.order.count({
+      where: {
+        tenantId: session.user.tenantId,
+        restaurantId: session.user.restaurantId,
+        source: "TAKEAWAY",
+        placedAt: { gte: startOfDay },
+      },
+    }),
+  
+    db.order.count({
+      where: {
+        tenantId: session.user.tenantId,
+        restaurantId: session.user.restaurantId,
+        source: "DELIVERY",
+        placedAt: { gte: startOfDay },
+      },
+    }),
+  ]);
   
   const revenue = revenueToday._sum.amount?.toString() ?? "0";
-
-  const completedOrdersToday = await db.order.count({
-    where: {
-      tenantId: session.user.tenantId,
-      restaurantId: session.user.restaurantId,
-      status: "COMPLETED",
-      placedAt: {
-        gte: startOfDay,
-      },
-    },
-  });
-  
-  const avgOrderValue =
-    completedOrdersToday > 0
-      ? (Number(revenue) / completedOrdersToday).toFixed(0)
-      : "0";
-  
-  const dineInOrders = await db.order.count({
-    where: {
-      tenantId: session.user.tenantId,
-      restaurantId: session.user.restaurantId,
-      source: "IN_STORE",
-      placedAt: {
-        gte: startOfDay,
-      },
-    },
-  });
-  
-  const takeawayOrders = await db.order.count({
-    where: {
-      tenantId: session.user.tenantId,
-      restaurantId: session.user.restaurantId,
-      source: "TAKEAWAY",
-      placedAt: {
-        gte: startOfDay,
-      },
-    },
-  });
-  
-  const deliveryOrders = await db.order.count({
-    where: {
-      tenantId: session.user.tenantId,
-      restaurantId: session.user.restaurantId,
-      source: "DELIVERY",
-      placedAt: {
-        gte: startOfDay,
-      },
-    },
-  });
   return (
     <div>
       <h1 style={{ margin: "0 0 20px", fontSize: "28px", color: "#111827" }}>Dashboard</h1>
