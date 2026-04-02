@@ -151,7 +151,7 @@ function Card({ title, value }: any) {
     <div
       style={{
         border: "1px solid #e5e7eb",
-        borderRadius: "10px",
+        borderRadius: "11px",
         padding: "20px",
         background: "white",
         minHeight: "110px",
