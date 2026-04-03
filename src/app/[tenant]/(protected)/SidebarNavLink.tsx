@@ -1,15 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 interface Props {
   href: string;
   label: string;
+  onNavigate?: () => void;
 }
 
-export default function SidebarNavLink({ href, label }: Props) {
+export default function SidebarNavLink({ href, label, onNavigate }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const isActive = pathname === href || pathname.startsWith(`${href}/`);
@@ -19,6 +19,9 @@ export default function SidebarNavLink({ href, label }: Props) {
       href={href}
       prefetch={true}
       onMouseEnter={() => router.prefetch(href)}
+      onClick={() => {
+        if (onNavigate) onNavigate();
+      }}
       style={{
         display: "block",
         padding: "10px 12px",
