@@ -27,8 +27,11 @@ export default function ActionButton({
         if (status) formData.append("status", status);
         if (amount) formData.append("amount", amount);
 
-        await action(tenant, formData);
+        // Refresh immediately (optimistic UI)
         router.refresh();
+
+        await action(tenant, formData);
+
         setLoading(false);
       }}
       style={{

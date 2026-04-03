@@ -12,7 +12,6 @@ interface Props {
 
 export default async function KitchenPage({ params }: Props) {
   const { tenant } = await params;
-
   const session = await requireAuth(tenant);
 
   const orders = await db.order.findMany({
@@ -91,20 +90,16 @@ function Column({ title, orders, tenant }: any) {
             {order.status === "PENDING" && (
               <>
                 <ActionButton
-                  action={async () => {
-                    await updateKitchenOrderStatus(
-                      tenant,
-                      order.id,
-                      "CONFIRMED"
-                    );
-                  }}
+                  action={updateKitchenOrderStatus}
+                  tenant={tenant}
+                  orderId={order.id}
+                  status="CONFIRMED"
                   style={{
                     padding: "8px 12px",
                     background: "#111827",
                     color: "white",
                     border: "none",
                     borderRadius: "8px",
-                    cursor: "pointer",
                     fontSize: "13px",
                   }}
                 >
@@ -112,13 +107,10 @@ function Column({ title, orders, tenant }: any) {
                 </ActionButton>
 
                 <ActionButton
-                  action={async () => {
-                    await updateKitchenOrderStatus(
-                      tenant,
-                      order.id,
-                      "CANCELLED"
-                    );
-                  }}
+                  action={updateKitchenOrderStatus}
+                  tenant={tenant}
+                  orderId={order.id}
+                  status="CANCELLED"
                   style={{
                     padding: "8px 12px",
                     background: "#fff",
@@ -126,7 +118,6 @@ function Column({ title, orders, tenant }: any) {
                     border: "1px solid #d1d5db",
                     borderRadius: "8px",
                     fontSize: "13px",
-                    cursor: "pointer",
                   }}
                 >
                   Decline
@@ -136,24 +127,20 @@ function Column({ title, orders, tenant }: any) {
 
             {order.status === "CONFIRMED" && (
               <ActionButton
-                action={async () => {
-                  await updateKitchenOrderStatus(
-                    tenant,
-                    order.id,
-                    "COMPLETED"
-                  );
-                }}
+                action={updateKitchenOrderStatus}
+                tenant={tenant}
+                orderId={order.id}
+                status="COMPLETED"
                 style={{
                   padding: "8px 12px",
                   background: "#16a34a",
                   color: "white",
                   border: "none",
                   borderRadius: "8px",
-                  cursor: "pointer",
                   fontSize: "13px",
                 }}
               >
-                Mark Complete
+                Ready
               </ActionButton>
             )}
           </div>

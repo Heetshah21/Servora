@@ -21,6 +21,11 @@ export default async function OrdersPage({ params }: Props) {
       status: {
         not: "CANCELLED",
       },
+      payments: {
+        none: {
+          status: "CAPTURED",
+        },
+      },
     },
     include: {
       items: true,
