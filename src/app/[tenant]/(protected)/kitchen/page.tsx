@@ -1,7 +1,10 @@
-export const revalidate = 10;
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { requireAuth } from "@/lib/require-auth";
 import { db } from "@/lib/db";
 import { updateKitchenOrderStatus } from "./actions";
+import ActionButton from "@/components/ActionButton";
 
 interface Props {
   params: Promise<{ tenant: string }>;
@@ -87,20 +90,71 @@ function Column({ title, orders, tenant }: any) {
           <div style={{ marginTop: "10px", display: "flex", gap: "6px" }}>
             {order.status === "PENDING" && (
               <>
-                <form action={updateKitchenOrderStatus.bind(null, tenant, order.id, "CONFIRMED")}>
-                  <button>Accept</button>
-                </form>
+                <ActionButton
+                  action={async () => {
+                    await updateKitchenOrderStatus(
+                      tenant,
+                      order.id,
+                      "CONFIRMED"
+                    );
+                  }}
+                  style={{
+                    padding: "8px 12px",
+                    background: "#111827",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                  }}
+                >
+                  Accept
+                </ActionButton>
 
-                <form action={updateKitchenOrderStatus.bind(null, tenant, order.id, "CANCELLED")}>
-                  <button>Decline</button>
-                </form>
+                <ActionButton
+                  action={async () => {
+                    await updateKitchenOrderStatus(
+                      tenant,
+                      order.id,
+                      "CANCELLED"
+                    );
+                  }}
+                  style={{
+                    padding: "8px 12px",
+                    background: "#fff",
+                    color: "#111827",
+                    border: "1px solid #d1d5db",
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Decline
+                </ActionButton>
               </>
             )}
 
             {order.status === "CONFIRMED" && (
-              <form action={updateKitchenOrderStatus.bind(null, tenant, order.id, "COMPLETED")}>
-                <button>Mark Complete</button>
-              </form>
+              <ActionButton
+                action={async () => {
+                  await updateKitchenOrderStatus(
+                    tenant,
+                    order.id,
+                    "COMPLETED"
+                  );
+                }}
+                style={{
+                  padding: "8px 12px",
+                  background: "#16a34a",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                }}
+              >
+                Mark Complete
+              </ActionButton>
             )}
           </div>
         </div>
