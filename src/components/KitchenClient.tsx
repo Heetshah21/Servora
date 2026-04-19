@@ -36,7 +36,7 @@ export default function KitchenClient({
     const interval = setInterval(async () => {
       try {
         const res = await fetch(
-          `/api/orders/list?tenantId=${tenantId}&restaurantId=${restaurantId}`
+          `/api/orders/list?tenantId=${tenantId}&restaurantId=${restaurantId}&type=kitchen`
         );
         const data: Order[] = await res.json();
 
@@ -64,19 +64,32 @@ export default function KitchenClient({
 
   // ⚡ Optimistic update
   const updateStatus = async (orderId: string, status: OrderStatus) => {
-    setOrders((prev) =>
-      prev.map((o) =>
+    // store previous state (for rollback)
+    let previousState: Order[] = [];
+  
+    setOrders((prev) => {
+      previousState = prev;
+      return prev.map((o) =>
         o.id === orderId ? { ...o, status } : o
-      )
-    );
-
+      );
+    });
+  
     try {
-      await fetch("/api/orders/update", {
+      const res = await fetch("/api/orders/update", {
         method: "POST",
         body: JSON.stringify({ orderId, status }),
       });
+  
+      const data = await res.json();
+  
+      if (!data.success) {
+        throw new Error("Update failed");
+      }
     } catch (err) {
-      console.error("Update failed:", err);
+      console.error(err);
+  
+      // ❌ rollback UI if failed
+      setOrders(previousState);
     }
   };
 

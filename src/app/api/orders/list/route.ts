@@ -1,22 +1,37 @@
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { OrderStatus } from "@prisma/client";
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
+
   const tenantId = searchParams.get("tenantId");
   const restaurantId = searchParams.get("restaurantId");
+  const type = searchParams.get("type"); // 👈 NEW
 
   if (!tenantId || !restaurantId) {
     return NextResponse.json({ error: "Missing params" });
+  }
+
+  let statusFilter:
+  | { in: OrderStatus[] }
+  | { not: OrderStatus };
+
+  if (type === "kitchen") {
+    statusFilter = {
+      in: [OrderStatus.PENDING, OrderStatus.CONFIRMED],
+    };
+  } else {
+    statusFilter = {
+      not: OrderStatus.CANCELLED,
+    };
   }
 
   const orders = await db.order.findMany({
     where: {
       tenantId,
       restaurantId,
-      status: {
-        in: ["PENDING", "CONFIRMED"],
-      },
+      status: statusFilter,
     },
     select: {
       id: true,
