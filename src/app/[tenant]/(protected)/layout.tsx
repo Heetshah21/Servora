@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/require-auth";
 import { db } from "@/lib/db";
 import Sidebar from "@/components/Sidebar";
+import { cache } from "react";
 
 interface Props {
   children: React.ReactNode;
@@ -15,11 +16,15 @@ export default async function TenantLayout({
 
   const session = await requireAuth(tenant);
 
-  const restaurant = await db.restaurant.findFirst({
-    where: {
-      tenantId: session.user.tenantId,
-    },
+  const getRestaurant = cache(async (tenantId: string) => { 
+    return db.restaurant.findFirst({
+      where: {
+        tenantId,
+      },
+    });
   });
+
+  const restaurant = await getRestaurant(session.user.tenantId);
 
   return (
     <div
