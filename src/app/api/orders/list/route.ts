@@ -38,7 +38,7 @@ export async function GET(req: Request) {
       orderCode: true,
       status: true,
       placedAt: true,
-
+      total: true,
       source: true,
       tableNumber: true,
       customerName: true,
