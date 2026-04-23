@@ -47,6 +47,22 @@ export default function OrdersClient({
   const [orders, setOrders] = useState<Order[]>(initialOrders);
   const [loadingIds, setLoadingIds] = useState<string[]>([]);
 
+  useEffect(() => {
+    const fetchLatest = async () => {
+      try {
+        const res = await fetch(
+          `/api/orders/list?tenantId=${tenantId}&restaurantId=${restaurantId}&type=orders`
+        );
+  
+        const data = await res.json();
+        setOrders(data);
+      } catch (err) {
+        console.error("Initial refresh failed", err);
+      }
+    };
+  
+    fetchLatest();
+  }, [tenantId, restaurantId]);
   // 🔁 Polling
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -108,6 +124,14 @@ export default function OrdersClient({
   const markPaid = async (order: Order) => {
     setLoadingIds((prev) => [...prev, order.id]);
   
+    let previous: Order[] = [];
+  
+    // 🔥 instantly remove from UI
+    setOrders((prev) => {
+      previous = prev;
+      return prev.filter((o) => o.id !== order.id);
+    });
+  
     try {
       const res = await fetch("/api/orders/pay", {
         method: "POST",
@@ -122,10 +146,9 @@ export default function OrdersClient({
   
       if (!data.success) throw new Error();
   
-      // remove instantly
-      setOrders((prev) => prev.filter((o) => o.id !== order.id));
-  
     } catch {
+      // rollback if failed
+      setOrders(previous);
       alert("Payment failed");
     } finally {
       setLoadingIds((prev) =>
