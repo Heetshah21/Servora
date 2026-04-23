@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL1")
 }
 
 model User {
@@ -289,6 +289,7 @@ enum OrderStatus {
   IN_PROGRESS
   READY
   COMPLETED
+  PAID
   CANCELLED
 }
 

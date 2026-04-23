@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
+import { OrderStatus } from "@prisma/client";
 
 export async function POST(req: Request) {
   try {
@@ -11,21 +12,41 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false });
     }
 
-    await db.payment.create({
-      data: {
+    // Prevent duplicate payment
+    const existingPayment = await db.payment.findFirst({
+      where: {
         orderId,
-        tenantId,
         status: "CAPTURED",
-        method: "CASH",
-        amount,
-        currency: "INR",
-        paidAt: new Date(),
+      },
+    });
+
+    if (!existingPayment) {
+      await db.payment.create({
+        data: {
+          orderId,
+          tenantId,
+          status: "CAPTURED",
+          method: "CASH",
+          amount: String(amount),
+          currency: "INR",
+          paidAt: new Date(),
+        },
+      });
+    }
+
+    // Mark order paid
+    await db.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        status: OrderStatus.PAID,
       },
     });
 
     return NextResponse.json({ success: true });
-  } catch (err) {
-    console.error("PAYMENT ERROR:", err);
+  } catch (error) {
+    console.error("PAY ERROR:", error);
     return NextResponse.json({ success: false });
   }
 }

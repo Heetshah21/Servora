@@ -19,7 +19,7 @@ export default async function OrdersPage({ params }: Props) {
       tenantId: session.user.tenantId,
       restaurantId: session.user.restaurantId,
       status: {
-        not: OrderStatus.CANCELLED, // ✅ use enum (not string)
+        notIn: [OrderStatus.CANCELLED, OrderStatus.PAID],
       },
     },
     select: {

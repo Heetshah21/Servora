@@ -14,8 +14,9 @@ export async function GET(req: Request) {
   }
 
   let statusFilter:
-    | { in: OrderStatus[] }
-    | { not: OrderStatus };
+  | { in: OrderStatus[] }
+  | { not: OrderStatus }
+  | { notIn: OrderStatus[] };
 
   if (type === "kitchen") {
     statusFilter = {
@@ -23,7 +24,7 @@ export async function GET(req: Request) {
     };
   } else {
     statusFilter = {
-      not: OrderStatus.CANCELLED,
+      notIn: [OrderStatus.CANCELLED, OrderStatus.PAID],
     };
   }
 
