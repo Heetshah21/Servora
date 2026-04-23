@@ -73,15 +73,20 @@ export default function OrdersClient({
         const data: Order[] = await res.json();
 
         setOrders((prev) =>
-          data.map((newOrder) => {
-            const existing = prev.find((o) => o.id === newOrder.id);
-
-            if (existing && existing.status !== newOrder.status) {
-              return existing;
-            }
-
-            return newOrder;
-          })
+          data
+            .filter(
+              (newOrder) =>
+                !loadingIds.includes(newOrder.id) // 🔥 ignore processing orders
+            )
+            .map((newOrder) => {
+              const existing = prev.find((o) => o.id === newOrder.id);
+        
+              if (existing && existing.status !== newOrder.status) {
+                return existing;
+              }
+        
+              return newOrder;
+            })
         );
       } catch (e) {
         console.error("Polling failed", e);
@@ -89,7 +94,7 @@ export default function OrdersClient({
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [tenantId, restaurantId]);
+  }, [tenantId, restaurantId, loadingIds]);
 
   // ⚡ Update status
   const updateStatus = async (orderId: string, status: OrderStatus) => {

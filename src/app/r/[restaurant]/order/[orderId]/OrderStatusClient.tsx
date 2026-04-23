@@ -24,10 +24,8 @@ export default function OrderStatusClient({ orderId }: any) {
       <p style={{ padding: "20px", textAlign: "center" }}>Loading...</p>
     );
 
-  // Determine PAID / DONE display status
-  const isPaid = order.payments && order.payments.length > 0;
-
-  const displayStatus = isPaid
+  const displayStatus =
+  order.status === "PAID"
     ? "PAID"
     : order.status === "COMPLETED"
     ? "DONE"
