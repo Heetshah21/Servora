@@ -12,8 +12,19 @@ export async function GET(
       where: {
         id: orderId,
       },
-      include: {
-        items: true,
+      select: {
+        id: true,
+        orderCode: true,
+        status: true,
+        total: true,
+        items: {
+          select: {
+            id: true,
+            name: true,
+            quantity: true,
+            notes: true,
+          },
+        },
       },
     });
 
@@ -27,11 +38,6 @@ export async function GET(
     return NextResponse.json({
       ...order,
       total: Number(order.total),
-      subtotal: Number(order.subtotal),
-      tax: Number(order.tax),
-      discount: Number(order.discount),
-      placedAt: order.placedAt?.toISOString(),
-      updatedAt: order.updatedAt?.toISOString(),
     });
   } catch (error) {
     console.error("ORDER API ERROR:", error);
