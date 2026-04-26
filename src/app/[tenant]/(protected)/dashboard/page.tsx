@@ -75,7 +75,7 @@ export default async function DashboardPage({ params }: Props) {
   const ordersToday = orders.length;
 
   const completedOrdersToday = orders.filter(
-    (o) => o.status === "COMPLETED"
+    (o) => o.status === "PAID"
   ).length;
 
   const dineInOrders = orders.filter(
