@@ -93,7 +93,7 @@ export default async function CustomerMenuPage({
                     background: "#ffffff",
                     boxSizing: "border-box",
                     boxShadow: "0 4px 14px rgba(0,0,0,0.06)",
-                    flexWrap: "wrap",
+                    flexWrap: "nowrap",
                   }}
                 >
                   {item.imageUrl && (
@@ -150,15 +150,15 @@ export default async function CustomerMenuPage({
                   </div>
 
                   <div
-                    className="menu-item-add-wrap"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "flex-end",
-                      width: "100%",
-                      marginTop: "8px",
-                    }}
-                  >
+                      className="menu-item-add-wrap"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "flex-end",
+                        flex: "0 0 auto",
+                        marginLeft: "auto",
+                      }}
+                    >
                     <AddToCartButton
                       item={{
                         id: item.id,

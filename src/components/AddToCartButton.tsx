@@ -12,7 +12,9 @@ export default function AddToCartButton({ item }: any) {
   useEffect(() => {
     const updateQty = () => {
       const items = getCart();
-      const existing = items.find((i: any) => i.id === item.id);
+      const existing = items.find(
+        (i: any) => i.id === item.id && i.isJain === false
+      );
       setQty(existing ? existing.quantity : 0);
     };
 
@@ -86,7 +88,7 @@ export default function AddToCartButton({ item }: any) {
     >
       <button
         onClick={() => {
-          removeFromCart(item.id);
+          removeFromCart(item.id, false);
           window.dispatchEvent(new Event("cartUpdated"));
         }}
         style={{
