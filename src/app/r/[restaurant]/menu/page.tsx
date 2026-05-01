@@ -111,7 +111,7 @@ export default async function CustomerMenuPage({
                     />
                   )}
 
-                  <div className="menu-item-body" style={{ flex: 1, minWidth: 0 }}>
+                  {/*<div className="menu-item-body" style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px", flexWrap: "nowrap" }}>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <strong style={{ display: "block", color: "#111827", fontSize: "15px" }}>
@@ -147,7 +147,7 @@ export default async function CustomerMenuPage({
                         )}
                       </div>
                     </div>
-                  </div>
+                  </div>*/}
 
                   <div
   style={{
@@ -172,7 +172,7 @@ export default async function CustomerMenuPage({
     )}
 
     <div style={{ fontWeight: 700 }}>
-      ₹{item.price}
+    ₹{item.price.toString()}
     </div>
   </div>
 
