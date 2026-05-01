@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { addToCart, removeFromCart, getCartItems } from "@/lib/cart";
+import { addToCart, removeFromCart, getCart } from "@/lib/cart";
 import AddToCartModal from "@/components/AddToCartModal";
 
 export default function AddToCartButton({ item }: any) {
@@ -11,7 +11,7 @@ export default function AddToCartButton({ item }: any) {
   // Sync quantity from cart on load + updates
   useEffect(() => {
     const updateQty = () => {
-      const items = getCartItems();
+      const items = getCart();
       const existing = items.find((i: any) => i.id === item.id);
       setQty(existing ? existing.quantity : 0);
     };

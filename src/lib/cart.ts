@@ -43,9 +43,24 @@ export interface CartItem {
   }
   
   export function removeFromCart(id: string, isJain?: boolean) {
-    const cart = getCart().filter(
-      (item) => !(item.id === id && item.isJain === isJain)
+    const cart = getCart();
+  
+    const item = cart.find(
+      (c) => c.id === id && c.isJain === isJain
     );
+  
+    if (!item) return;
+  
+    if (item.quantity > 1) {
+      item.quantity -= 1;
+    } else {
+      const updated = cart.filter(
+        (c) => !(c.id === id && c.isJain === isJain)
+      );
+      saveCart(updated);
+      return;
+    }
+  
     saveCart(cart);
   }
   
