@@ -20,7 +20,7 @@ export async function GET(req: Request) {
 
   if (type === "kitchen") {
     statusFilter = {
-      in: [OrderStatus.PENDING, OrderStatus.CONFIRMED],
+      in: [OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.READY],
     };
   } else {
     statusFilter = {
