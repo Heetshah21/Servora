@@ -22,15 +22,12 @@ export async function GET(req: Request) {
     startOfDay.setHours(0, 0, 0, 0);
 
     const [
-      ordersToday,
-      activeOrders,
-      completedOrders,
-      pendingOrders,
-      readyOrders,
+      orders,
       revenueToday,
+      menuItems,
     ] = await Promise.all([
-      // Orders today
-      db.order.count({
+      // Single optimized orders query
+      db.order.findMany({
         where: {
           tenantId,
           restaurantId,
@@ -38,55 +35,14 @@ export async function GET(req: Request) {
             gte: startOfDay,
           },
         },
-      }),
 
-      // Active operational orders
-      db.order.count({
-        where: {
-          tenantId,
-          restaurantId,
-          status: {
-            in: [
-              "PENDING",
-              "CONFIRMED",
-              "IN_PROGRESS",
-              "READY",
-            ],
-          },
+        select: {
+          status: true,
+          source: true,
         },
       }),
 
-      // Completed / paid today
-      db.order.count({
-        where: {
-          tenantId,
-          restaurantId,
-          status: "PAID",
-          placedAt: {
-            gte: startOfDay,
-          },
-        },
-      }),
-
-      // Pending orders
-      db.order.count({
-        where: {
-          tenantId,
-          restaurantId,
-          status: "PENDING",
-        },
-      }),
-
-      // Ready orders
-      db.order.count({
-        where: {
-          tenantId,
-          restaurantId,
-          status: "READY",
-        },
-      }),
-
-      // Revenue today
+      // Revenue aggregate
       db.payment.aggregate({
         where: {
           tenantId,
@@ -98,16 +54,61 @@ export async function GET(req: Request) {
             gte: startOfDay,
           },
         },
+
         _sum: {
           amount: true,
         },
       }),
+
+      // Menu count
+      db.menuItem.count({
+        where: {
+          tenantId,
+          restaurantId,
+        },
+      }),
     ]);
 
-    const revenue =
-      Number(
-        revenueToday._sum.amount ?? 0
-      );
+    // In-memory analytics calculations
+    const ordersToday = orders.length;
+
+    const completedOrders =
+      orders.filter(
+        (o) => o.status === "PAID"
+      ).length;
+
+    const pendingOrders = orders.filter(
+      (o) => o.status === "PENDING"
+    ).length;
+
+    const readyOrders = orders.filter(
+      (o) => o.status === "READY"
+    ).length;
+
+    const activeOrders = orders.filter((o) =>
+      [
+        "PENDING",
+        "CONFIRMED",
+        "IN_PROGRESS",
+        "READY",
+      ].includes(o.status)
+    ).length;
+
+    const dineInOrders = orders.filter(
+      (o) => o.source === "IN_STORE"
+    ).length;
+
+    const takeawayOrders = orders.filter(
+      (o) => o.source === "TAKEAWAY"
+    ).length;
+
+    const deliveryOrders = orders.filter(
+      (o) => o.source === "DELIVERY"
+    ).length;
+
+    const revenue = Number(
+      revenueToday._sum.amount ?? 0
+    );
 
     const avgOrderValue =
       completedOrders > 0
@@ -122,8 +123,15 @@ export async function GET(req: Request) {
       completedOrders,
       pendingOrders,
       readyOrders,
+
       revenueToday: revenue,
       avgOrderValue,
+
+      menuItems,
+
+      dineInOrders,
+      takeawayOrders,
+      deliveryOrders,
     });
   } catch (err) {
     console.log(err);
